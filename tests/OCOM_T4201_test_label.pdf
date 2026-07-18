@@ -1,0 +1,80 @@
+%PDF-1.4
+% OCOM test label
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 288 108] /CropBox [0 0 288 108] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 672 >>
+stream
+q
+0 G
+1 g
+0 0 288 108 re f
+0 g
+1 w
+4 4 280 100 re S
+32.0 42 4 52 re f
+38.0 42 2 52 re f
+44.0 42 2 52 re f
+54.0 42 2 52 re f
+58.0 42 4 52 re f
+64.0 42 6 52 re f
+76.0 42 2 52 re f
+84.0 42 6 52 re f
+92.0 42 4 52 re f
+98.0 42 4 52 re f
+108.0 42 2 52 re f
+112.0 42 2 52 re f
+120.0 42 2 52 re f
+124.0 42 6 52 re f
+136.0 42 4 52 re f
+142.0 42 2 52 re f
+146.0 42 4 52 re f
+156.0 42 2 52 re f
+164.0 42 2 52 re f
+172.0 42 6 52 re f
+180.0 42 4 52 re f
+186.0 42 2 52 re f
+194.0 42 4 52 re f
+200.0 42 2 52 re f
+208.0 42 6 52 re f
+218.0 42 4 52 re f
+226.0 42 2 52 re f
+230.0 42 4 52 re f
+240.0 42 6 52 re f
+248.0 42 2 52 re f
+252.0 42 4 52 re f
+BT
+/F2 14 Tf
+109 18 Td
+(JOHN DOE) Tj
+ET
+Q
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000027 00000 n 
+0000000076 00000 n 
+0000000133 00000 n 
+0000000292 00000 n 
+0000001015 00000 n 
+0000001085 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1160
+%%EOF

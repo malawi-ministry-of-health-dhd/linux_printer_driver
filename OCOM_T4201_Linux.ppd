@@ -1,0 +1,206 @@
+*PPD-Adobe: "4.3"
+*FormatVersion: "4.3"
+*FileVersion: "1.0"
+*LanguageVersion: English
+*LanguageEncoding: ISOLatin1
+*PCFileName: "OCOMT42.PPD"
+*Manufacturer: "LabelPrinter"
+*Product: "(LabelPrinter OCBP-T4201)"
+*ModelName: "LabelPrinter OCBP-T4201"
+*ShortNickName: "OCOM OCBP-T4201"
+*NickName: "LabelPrinter OCBP-T4201, TSPL2, 203 dpi"
+*1284DeviceID: "MFG:Label Printer;CMD:TSPL2;MDL:LabelPrinter OCBP-T4201;CLS:PRINTER;"
+*PSVersion: "(3010.000) 550"
+*LanguageLevel: "3"
+*ColorDevice: False
+*DefaultColorSpace: Gray
+*FileSystem: False
+*Throughput: "1"
+*LandscapeOrientation: Plus90
+*TTRasterizer: Type42
+*cupsVersion: 1.2
+*cupsManualCopies: False
+*cupsFilter: "application/vnd.cups-raster 0 raster_to_tspl"
+*cupsFilter: "application/vnd.ocom-zpl 0 zpl_to_tspl"
+*cupsFilter2: "application/vnd.cups-raster application/vnd.ocom-tspl 0 raster_to_tspl"
+*cupsFilter2: "application/vnd.ocom-zpl application/vnd.ocom-tspl 0 zpl_to_tspl"
+*cupsSNMPSupplies: False
+
+*HWMargins: 0 0 0 0
+*MaxMediaWidth: "306.14"
+*MaxMediaHeight: "6480"
+*CustomPageSize True: "pop pop pop <</PageSize[5 -2 roll]/ImagingBBox null>>setpagedevice"
+*ParamCustomPageSize Width: 1 points 14.17 306.14
+*ParamCustomPageSize Height: 2 points 14.17 6480
+*ParamCustomPageSize WidthOffset: 3 points 0 0
+*ParamCustomPageSize HeightOffset: 4 points 0 0
+*ParamCustomPageSize Orientation: 5 int 0 0
+*RequiresPageRegion All: True
+
+*OpenGroup: General/General
+*OpenUI *PageSize/Media Size: PickOne
+*OrderDependency: 10 AnySetup *PageSize
+*DefaultPageSize: w288h108
+*PageSize w288h108/4 x 1.5 in (101.6 x 38.1 mm): "<</PageSize[288 108]/ImagingBBox null>>setpagedevice"
+*PageSize w144h288/2 x 4 in (50.8 x 101.6 mm): "<</PageSize[144 288]/ImagingBBox null>>setpagedevice"
+*PageSize w144h360/2 x 5 in (50.8 x 127.0 mm): "<</PageSize[144 360]/ImagingBBox null>>setpagedevice"
+*PageSize w216h288/3 x 4 in (76.2 x 101.6 mm): "<</PageSize[216 288]/ImagingBBox null>>setpagedevice"
+*PageSize w216h432/3 x 6 in (76.2 x 152.4 mm): "<</PageSize[216 432]/ImagingBBox null>>setpagedevice"
+*PageSize w288h288/4 x 4 in (101.6 x 101.6 mm): "<</PageSize[288 288]/ImagingBBox null>>setpagedevice"
+*PageSize w288h432/4 x 6 in (101.6 x 152.4 mm): "<</PageSize[288 432]/ImagingBBox null>>setpagedevice"
+*CloseUI: *PageSize
+
+*OpenUI *PageRegion/Media Size: PickOne
+*OrderDependency: 10 AnySetup *PageRegion
+*DefaultPageRegion: w288h108
+*PageRegion w288h108/4 x 1.5 in (101.6 x 38.1 mm): "<</PageSize[288 108]/ImagingBBox null>>setpagedevice"
+*PageRegion w144h288/2 x 4 in (50.8 x 101.6 mm): "<</PageSize[144 288]/ImagingBBox null>>setpagedevice"
+*PageRegion w144h360/2 x 5 in (50.8 x 127.0 mm): "<</PageSize[144 360]/ImagingBBox null>>setpagedevice"
+*PageRegion w216h288/3 x 4 in (76.2 x 101.6 mm): "<</PageSize[216 288]/ImagingBBox null>>setpagedevice"
+*PageRegion w216h432/3 x 6 in (76.2 x 152.4 mm): "<</PageSize[216 432]/ImagingBBox null>>setpagedevice"
+*PageRegion w288h288/4 x 4 in (101.6 x 101.6 mm): "<</PageSize[288 288]/ImagingBBox null>>setpagedevice"
+*PageRegion w288h432/4 x 6 in (101.6 x 152.4 mm): "<</PageSize[288 432]/ImagingBBox null>>setpagedevice"
+*CloseUI: *PageRegion
+
+*DefaultImageableArea: w288h108
+*ImageableArea w288h108: "0 0 288 108"
+*ImageableArea w144h288: "0 0 144 288"
+*ImageableArea w144h360: "0 0 144 360"
+*ImageableArea w216h288: "0 0 216 288"
+*ImageableArea w216h432: "0 0 216 432"
+*ImageableArea w288h288: "0 0 288 288"
+*ImageableArea w288h432: "0 0 288 432"
+
+*DefaultPaperDimension: w288h108
+*PaperDimension w288h108: "288 108"
+*PaperDimension w144h288: "144 288"
+*PaperDimension w144h360: "144 360"
+*PaperDimension w216h288: "216 288"
+*PaperDimension w216h432: "216 432"
+*PaperDimension w288h288: "288 288"
+*PaperDimension w288h432: "288 432"
+
+*OpenUI *Collate/Collate: Boolean
+*OrderDependency: 200 AnySetup *Collate
+*DefaultCollate: False
+*Collate True/Yes: "<</Collate true>>setpagedevice"
+*Collate False/No: "<</Collate false>>setpagedevice"
+*CloseUI: *Collate
+*CloseGroup: General
+
+*OpenGroup: Quality/Quality
+*OpenUI *Resolution/Resolution: PickOne
+*OrderDependency: 300 AnySetup *Resolution
+*DefaultResolution: 203dpi
+*Resolution 203dpi/203 x 203 dpi: "<</HWResolution[203 203]/cupsBitsPerColor 1/cupsBitsPerPixel 1/cupsColorOrder 0/cupsColorSpace 3>>setpagedevice"
+*CloseUI: *Resolution
+*CloseGroup: Quality
+
+*OpenGroup: Media/Media
+*OpenUI *MediaMethod/Print Method: PickOne
+*OrderDependency: 110 AnySetup *MediaMethod
+*DefaultMediaMethod: Transfer
+*MediaMethod Direct/Direct Thermal: ""
+*MediaMethod Transfer/Thermal Transfer: ""
+*CloseUI: *MediaMethod
+
+*OpenUI *PaperType/Media Tracking: PickOne
+*OrderDependency: 120 AnySetup *PaperType
+*DefaultPaperType: LabelGaps
+*PaperType LabelGaps/Labels with Gaps: ""
+*PaperType LabelMark/Labels with Black Mark: ""
+*PaperType Continue/Continuous Media: ""
+*CloseUI: *PaperType
+
+*OpenUI *GapsHeight/Gap or Mark Height: PickOne
+*OrderDependency: 130 AnySetup *GapsHeight
+*DefaultGapsHeight: 3
+*GapsHeight 0/0 mm: ""
+*GapsHeight 1/1 mm: ""
+*GapsHeight 2/2 mm: ""
+*GapsHeight 3/3 mm: ""
+*GapsHeight 4/4 mm: ""
+*GapsHeight 5/5 mm: ""
+*GapsHeight 6/6 mm: ""
+*GapsHeight 7/7 mm: ""
+*GapsHeight 8/8 mm: ""
+*GapsHeight 9/9 mm: ""
+*GapsHeight 10/10 mm: ""
+*CloseUI: *GapsHeight
+*CloseGroup: Media
+
+*OpenGroup: PrinterOptions/Printer Options
+*OpenUI *PrintSpeed/Print Speed: PickOne
+*OrderDependency: 110 AnySetup *PrintSpeed
+*DefaultPrintSpeed: 5
+*PrintSpeed 2/2 inches/second: ""
+*PrintSpeed 3/3 inches/second: ""
+*PrintSpeed 4/4 inches/second: ""
+*PrintSpeed 5/5 inches/second: ""
+*PrintSpeed 6/6 inches/second: ""
+*CloseUI: *PrintSpeed
+
+*OpenUI *Darkness/Darkness: PickOne
+*OrderDependency: 120 AnySetup *Darkness
+*DefaultDarkness: 8
+*Darkness 0/0: ""
+*Darkness 1/1: ""
+*Darkness 2/2: ""
+*Darkness 3/3: ""
+*Darkness 4/4: ""
+*Darkness 5/5: ""
+*Darkness 6/6: ""
+*Darkness 7/7: ""
+*Darkness 8/8: ""
+*Darkness 9/9: ""
+*Darkness 10/10: ""
+*Darkness 11/11: ""
+*Darkness 12/12: ""
+*Darkness 13/13: ""
+*Darkness 14/14: ""
+*Darkness 15/15: ""
+*CloseUI: *Darkness
+
+*OpenUI *PostAction/Post-Print Action: PickOne
+*OrderDependency: 130 AnySetup *PostAction
+*DefaultPostAction: TearOff
+*PostAction None/None: ""
+*PostAction TearOff/Tear Off: ""
+*PostAction PeelOff/Peel Off: ""
+*PostAction Cut/Cut: ""
+*CloseUI: *PostAction
+
+*OpenUI *Horizontal/Horizontal Offset: PickOne
+*OrderDependency: 140 AnySetup *Horizontal
+*DefaultHorizontal: 0mm
+*Horizontal -10mm/-10 mm: ""
+*Horizontal -5mm/-5 mm: ""
+*Horizontal -2mm/-2 mm: ""
+*Horizontal -1mm/-1 mm: ""
+*Horizontal 0mm/0 mm: ""
+*Horizontal 1mm/1 mm: ""
+*Horizontal 2mm/2 mm: ""
+*Horizontal 5mm/5 mm: ""
+*Horizontal 10mm/10 mm: ""
+*CloseUI: *Horizontal
+
+*OpenUI *Vertical/Vertical Offset: PickOne
+*OrderDependency: 150 AnySetup *Vertical
+*DefaultVertical: 0mm
+*Vertical -10mm/-10 mm: ""
+*Vertical -5mm/-5 mm: ""
+*Vertical -2mm/-2 mm: ""
+*Vertical -1mm/-1 mm: ""
+*Vertical 0mm/0 mm: ""
+*Vertical 1mm/1 mm: ""
+*Vertical 2mm/2 mm: ""
+*Vertical 5mm/5 mm: ""
+*Vertical 10mm/10 mm: ""
+*CloseUI: *Vertical
+*CloseGroup: PrinterOptions
+
+*DefaultFont: Courier
+*Font Courier: Standard "(002.004S)" Standard ROM
+*Font Courier-Bold: Standard "(002.004S)" Standard ROM
+*Font Courier-Oblique: Standard "(002.004S)" Standard ROM
+*Font Courier-BoldOblique: Standard "(002.004S)" Standard ROM

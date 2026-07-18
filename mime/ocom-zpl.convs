@@ -1,0 +1,2 @@
+# Convert host-side ZPL input to the OCOM queue's native TSPL2 format.
+application/vnd.ocom-zpl application/vnd.ocom-tspl 0 zpl_to_tspl

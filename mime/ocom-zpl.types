@@ -1,0 +1,3 @@
+# ZPL II jobs for the host-side OCOM ZPL-to-TSPL2 translator.
+application/vnd.ocom-zpl zpl string(0,"^XA")
+application/vnd.ocom-tspl
