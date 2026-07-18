@@ -1,0 +1,13 @@
+Package: ocom-ocbp-t4201-driver
+Version: @VERSION@
+Section: text
+Priority: optional
+Architecture: @ARCH@
+Maintainer: OCOM Driver Maintainers <support@example.invalid>
+Installed-Size: @INSTALLED_SIZE@
+Depends: cups, cups-client, python3, libcups2 | libcups2t64, libcupsimage2 | libcupsimage2t64
+Recommends: cups-filters, ghostscript
+Description: CUPS driver and ZPL translator for the OCOM OCBP-T4201
+ Provides a 203 dpi CUPS raster-to-TSPL2 filter, PPD, host-side
+ ZPL-to-TSPL2 translator, 101.6 x 38.1 mm label defaults, automatic USB
+ queue configuration, and a ZPL barcode test print.

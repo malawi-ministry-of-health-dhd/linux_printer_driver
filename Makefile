@@ -20,6 +20,9 @@ DARKNESS ?= 8
 SETUP_TEST ?= zpl
 INPUT ?= tests/OCOM_T4201_test_label.zpl
 OUTPUT ?= /tmp/OCOM_T4201_translated.tspl
+VERSION ?= 1.0.0
+DEB_PLATFORM ?= linux/amd64
+DEB_IMAGE ?= ubuntu:22.04
 
 CUPS_SERVERBIN ?= $(shell $(CUPS_CONFIG) --serverbin 2>/dev/null || printf '%s' /usr/lib/cups)
 FILTER_DIR ?= $(CUPS_SERVERBIN)/filter
@@ -33,7 +36,7 @@ SAMPLE_ZPL := $(abspath tests/OCOM_T4201_test_label.zpl)
 ZPL_TRANSLATOR := $(abspath zpl_to_tspl.py)
 
 .NOTPARALLEL:
-.PHONY: all check clean configure help install sample-pdf restart-cups setup test-pdf test-printer test-tspl test-zpl translate-zpl
+.PHONY: all check clean configure deb deb-docker help install package-version sample-pdf restart-cups setup test-pdf test-printer test-tspl test-zpl translate-zpl
 
 all: raster_to_tspl
 
@@ -47,8 +50,19 @@ check: raster_to_tspl tests/generate_test_raster
 	./raster_to_tspl </dev/null 2>/dev/null; test $$? -eq 1
 	./tests/generate_test_raster | ./raster_to_tspl >/dev/null
 	$(PYTHON) -m unittest tests/test_zpl_translator.py
-	sh -n scripts/configure-printer.sh scripts/print-sample.sh scripts/test-printer.sh
+	sh -n scripts/*.sh scripts/ocom-t4201-setup packaging/debian/postinst packaging/debian/postrm
+	./tests/test_auto_setup.sh
 	cupstestppd -q -I filters OCOM_T4201_Linux.ppd
+
+deb: check
+	VERSION="$(VERSION)" ./scripts/build-deb.sh
+
+deb-docker:
+	VERSION="$(VERSION)" DEB_PLATFORM="$(DEB_PLATFORM)" DEB_IMAGE="$(DEB_IMAGE)" \
+	./scripts/build-deb-docker.sh
+
+package-version:
+	@printf '%s\n' "$(VERSION)"
 
 install: raster_to_tspl zpl_to_tspl.py OCOM_T4201_Linux.ppd mime/ocom-zpl.types mime/ocom-zpl.convs
 	install -d -o root -g root -m 0755 "$(FILTER_DIR)" "$(PPD_DIR)" "$(MIME_DIR)"
@@ -122,6 +136,8 @@ translate-zpl:
 
 help:
 	@echo "make                         Build the raster_to_tspl filter"
+	@echo "make deb                     Build a .deb on Debian/Ubuntu"
+	@echo "make deb-docker              Build an amd64 .deb using Docker"
 	@echo "sudo make setup              Install/configure, then print the sample ZPL label"
 	@echo "sudo make setup SETUP_TEST=none  Install/configure without physical printing"
 	@echo "make test-printer            Test raster filter and USB connection"

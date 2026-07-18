@@ -99,7 +99,7 @@
 *OpenGroup: Media/Media
 *OpenUI *MediaMethod/Print Method: PickOne
 *OrderDependency: 110 AnySetup *MediaMethod
-*DefaultMediaMethod: Transfer
+*DefaultMediaMethod: Direct
 *MediaMethod Direct/Direct Thermal: ""
 *MediaMethod Transfer/Thermal Transfer: ""
 *CloseUI: *MediaMethod

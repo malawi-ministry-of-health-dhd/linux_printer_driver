@@ -1,0 +1,14 @@
+# OCOM OCBP-T4201 automatic CUPS setup defaults.
+#
+# After changing these values, apply them with:
+#   sudo ocom-t4201-setup
+
+OCOM_QUEUE=OCOM_Ubuntu_Driver
+OCOM_URI=
+OCOM_METHOD=Direct
+OCOM_PAGE_SIZE=w288h108
+OCOM_PAPER_TYPE=LabelGaps
+OCOM_GAP_MM=3
+OCOM_SPEED=5
+OCOM_DARKNESS=8
+OCOM_PRINT_TEST=yes

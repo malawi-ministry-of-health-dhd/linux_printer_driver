@@ -1,0 +1,93 @@
+name: Build Debian package
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deb-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-amd64:
+    name: Build and verify amd64 package
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cups-client \
+            dpkg-dev \
+            file \
+            libcups2-dev \
+            libcupsimage2-dev \
+            python3
+
+      - name: Select Debian package version
+        id: package-version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            base_version="$(make --silent package-version)"
+            short_sha="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+            version="${base_version}+git${GITHUB_RUN_NUMBER}.${short_sha}"
+          fi
+          printf 'version=%s\n' "$version" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Build and test Debian package
+        run: make deb VERSION="${{ steps.package-version.outputs.version }}"
+
+      - name: Inspect package and smoke-test ZPL translation
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.package-version.outputs.version }}"
+          package="dist/ocom-ocbp-t4201-driver_${version}_amd64.deb"
+          test -f "$package"
+          test "$(dpkg-deb --field "$package" Package)" = \
+            "ocom-ocbp-t4201-driver"
+          test "$(dpkg-deb --field "$package" Version)" = "$version"
+          test "$(dpkg-deb --field "$package" Architecture)" = "amd64"
+
+          package_root="$(mktemp -d)"
+          trap 'rm -rf "$package_root"' EXIT
+          dpkg-deb --extract "$package" "$package_root"
+
+          file "$package_root/usr/lib/cups/filter/raster_to_tspl" |
+            grep -q 'ELF 64-bit'
+          "$package_root/usr/lib/cups/filter/zpl_to_tspl" \
+            "$package_root/usr/share/ocom-t4201/OCOM_T4201_test_label.zpl" \
+            > "$package_root/test-output.tspl"
+          grep -a -q 'BARCODE.*JOHNDOE' "$package_root/test-output.tspl"
+          grep -a -q 'JOHN DOE' "$package_root/test-output.tspl"
+          grep -a -q 'PRINT 1,1' "$package_root/test-output.tspl"
+
+          (
+            cd dist
+            sha256sum "$(basename "$package")" > SHA256SUMS
+          )
+          dpkg-deb --info "$package"
+
+      - name: Upload Debian package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ocom-t4201-${{ steps.package-version.outputs.version }}-amd64
+          path: |
+            dist/*.deb
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

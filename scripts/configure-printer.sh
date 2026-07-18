@@ -19,7 +19,7 @@ fail()
 }
 
 [ "$(id -u)" -eq 0 ] ||
-  fail "configuration requires root; run: sudo make setup"
+  fail "configuration requires root; run: sudo ocom-t4201-setup"
 
 for command_name in lpadmin lpinfo cupsenable cupsaccept lpoptions; do
   command -v "$command_name" >/dev/null 2>&1 ||
@@ -49,11 +49,27 @@ if [ -z "$uri" ]; then
       uri=$1
       ;;
     *)
-      printf 'Multiple USB printers were detected:\n' >&2
+      preferred_uri=
+      preferred_count=0
       for detected_uri in "$@"; do
-        printf '  %s\n' "$detected_uri" >&2
+        lowercase_uri=$(printf '%s' "$detected_uri" | tr '[:upper:]' '[:lower:]')
+        case "$lowercase_uri" in
+          *ocom*|*ocbp-t4201*|*labelprinter*|*label%20printer*)
+            preferred_uri=$detected_uri
+            preferred_count=$((preferred_count + 1))
+            ;;
+        esac
       done
-      fail "choose one explicitly: sudo make setup URI='usb://...'"
+
+      if [ "$preferred_count" -eq 1 ]; then
+        uri=$preferred_uri
+      else
+        printf 'Multiple USB printers were detected:\n' >&2
+        for detected_uri in "$@"; do
+          printf '  %s\n' "$detected_uri" >&2
+        done
+        fail "choose one explicitly: sudo ocom-t4201-setup --uri 'usb://...'"
+      fi
       ;;
   esac
 fi

@@ -1,0 +1,156 @@
+#!/bin/sh
+
+set -eu
+
+config_file=${OCOM_CONFIG_FILE:-/etc/default/ocom-t4201-driver}
+
+if [ -r "$config_file" ]; then
+  # This file is installed as a root-owned Debian conffile.
+  # shellcheck disable=SC1090
+  . "$config_file"
+fi
+
+: "${OCOM_QUEUE:=OCOM_Ubuntu_Driver}"
+: "${OCOM_URI:=}"
+: "${OCOM_METHOD:=Direct}"
+: "${OCOM_PAGE_SIZE:=w288h108}"
+: "${OCOM_PAPER_TYPE:=LabelGaps}"
+: "${OCOM_GAP_MM:=3}"
+: "${OCOM_SPEED:=5}"
+: "${OCOM_DARKNESS:=8}"
+: "${OCOM_PRINT_TEST:=yes}"
+
+ppd_path=${OCOM_PPD_PATH:-/usr/share/ppd/ocom/OCOM_T4201_Linux.ppd}
+support_dir=${OCOM_SUPPORT_DIR:-/usr/lib/ocom-t4201}
+sample_dir=${OCOM_SAMPLE_DIR:-/usr/share/ocom-t4201}
+translator_path=${OCOM_TRANSLATOR_PATH:-/usr/lib/cups/filter/zpl_to_tspl}
+automatic=no
+
+usage()
+{
+  cat <<'EOF'
+Usage: sudo ocom-t4201-setup [options]
+
+Options:
+  --uri URI       Use an explicit usb:// printer URI
+  --queue NAME    Set the CUPS queue name
+  --direct        Configure direct-thermal printing (default)
+  --transfer      Configure thermal-transfer printing
+  --test          Print the included ZPL test label
+  --no-test       Configure without printing
+  --automatic     Non-interactive package post-install mode
+  --help          Show this help
+EOF
+}
+
+fail()
+{
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --uri)
+      [ "$#" -ge 2 ] || fail "--uri requires a value"
+      OCOM_URI=$2
+      shift 2
+      ;;
+    --queue)
+      [ "$#" -ge 2 ] || fail "--queue requires a value"
+      OCOM_QUEUE=$2
+      shift 2
+      ;;
+    --direct)
+      OCOM_METHOD=Direct
+      shift
+      ;;
+    --transfer)
+      OCOM_METHOD=Transfer
+      shift
+      ;;
+    --test)
+      OCOM_PRINT_TEST=yes
+      shift
+      ;;
+    --no-test)
+      OCOM_PRINT_TEST=no
+      shift
+      ;;
+    --automatic)
+      automatic=yes
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      fail "unknown option: $1"
+      ;;
+  esac
+done
+
+[ "$(id -u)" -eq 0 ] ||
+  fail "run this command as root: sudo ocom-t4201-setup"
+
+case "$OCOM_PRINT_TEST" in
+  yes|no) ;;
+  *) fail "OCOM_PRINT_TEST must be yes or no in $config_file" ;;
+esac
+
+[ -x "$support_dir/configure-printer.sh" ] ||
+  fail "driver support files are missing; reinstall the Debian package"
+[ -r "$ppd_path" ] ||
+  fail "PPD file is missing: $ppd_path"
+
+if command -v systemctl >/dev/null 2>&1 &&
+   [ -d /run/systemd/system ]; then
+  systemctl enable --now cups.service >/dev/null
+elif command -v service >/dev/null 2>&1; then
+  service cups start >/dev/null 2>&1 || true
+fi
+
+printf 'OCOM OCBP-T4201 automatic setup\n'
+
+if ! QUEUE="$OCOM_QUEUE" \
+  URI="$OCOM_URI" \
+  METHOD="$OCOM_METHOD" \
+  PAGE_SIZE="$OCOM_PAGE_SIZE" \
+  PAPER_TYPE="$OCOM_PAPER_TYPE" \
+  GAP_MM="$OCOM_GAP_MM" \
+  SPEED="$OCOM_SPEED" \
+  DARKNESS="$OCOM_DARKNESS" \
+  PPD_PATH="$ppd_path" \
+  "$support_dir/configure-printer.sh"; then
+  if [ "$automatic" = yes ]; then
+    printf '%s\n' \
+      "Automatic setup could not find an unambiguous USB printer." \
+      "The driver is installed. Connect the printer and run:" \
+      "  sudo ocom-t4201-setup" >&2
+  fi
+  exit 1
+fi
+
+if [ "$OCOM_PRINT_TEST" = yes ]; then
+  [ -x "$support_dir/print-sample.sh" ] ||
+    fail "print test helper is missing"
+  [ -r "$sample_dir/OCOM_T4201_test_label.zpl" ] ||
+    fail "ZPL test label is missing"
+
+  printf 'Printing the 101.6 x 38.1 mm ZPL test label...\n'
+  QUEUE="$OCOM_QUEUE" \
+  METHOD="$OCOM_METHOD" \
+  PAGE_SIZE="$OCOM_PAGE_SIZE" \
+  PAPER_TYPE="$OCOM_PAPER_TYPE" \
+  GAP_MM="$OCOM_GAP_MM" \
+  SPEED="$OCOM_SPEED" \
+  DARKNESS="$OCOM_DARKNESS" \
+  SAMPLE_FILE="$sample_dir/OCOM_T4201_test_label.zpl" \
+  TRANSLATOR_PATH="$translator_path" \
+  "$support_dir/print-sample.sh" zpl
+else
+  printf 'Physical test print skipped.\n'
+fi
+
+printf 'Setup complete. CUPS queue: %s\n' "$OCOM_QUEUE"

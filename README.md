@@ -16,6 +16,96 @@ The 25 mm roll core is a physical media property and needs no CUPS or TSPL
 setting. The PPD also includes the manufacturer's 2 × 4, 2 × 5, 3 × 4, 3 × 6,
 4 × 4, and 4 × 6 inch media sizes.
 
+## Automatic GitHub builds
+
+Every push to GitHub runs `.github/workflows/build-deb.yml`. The workflow:
+
+1. Builds and tests the driver on an Ubuntu 22.04 amd64 runner.
+2. Creates the installable Debian package.
+3. Verifies its package metadata and Linux ELF filter.
+4. Translates the included ZPL label as a smoke test.
+5. Uploads the `.deb` and `SHA256SUMS` as a GitHub Actions artifact retained
+   for 30 days.
+
+Open the repository's **Actions** tab, select the **Build Debian package**
+run, and download its artifact. Branch pushes use a unique version such as
+`1.0.0+git42.a1b2c3d`. A pushed tag beginning with `v`, such as `v1.2.0`,
+builds package version `1.2.0`.
+
+The workflow can also be started manually from **Actions → Build Debian
+package → Run workflow**.
+
+## Install the Debian package
+
+The `.deb` performs the full setup automatically. During its first
+installation it:
+
+1. Installs the CUPS raster filter, PPD, ZPL translator, and MIME rules.
+2. Starts or restarts CUPS.
+3. Detects the connected USB label printer and creates
+   `OCOM_Ubuntu_Driver`.
+4. Applies direct-thermal, 101.6 × 38.1 mm, 3 mm gap, speed 5, and darkness 8
+   defaults.
+5. Submits the included ZPL barcode test label through CUPS.
+
+Build an amd64 Ubuntu package from macOS, Linux, or another Docker host:
+
+```sh
+make deb-docker
+```
+
+The package is written to:
+
+```text
+dist/ocom-ocbp-t4201-driver_1.0.0_amd64.deb
+```
+
+Copy it to the Ubuntu computer, connect and power on the printer, then install
+it with `apt` so dependencies are resolved automatically:
+
+```sh
+sudo apt install ./ocom-ocbp-t4201-driver_1.0.0_amd64.deb
+```
+
+If the Ubuntu computer uses ARM64:
+
+```sh
+make deb-docker DEB_PLATFORM=linux/arm64
+sudo apt install ./ocom-ocbp-t4201-driver_1.0.0_arm64.deb
+```
+
+The package remains successfully installed when no printer is connected.
+Connect it later and finish configuration with:
+
+```sh
+sudo ocom-t4201-setup
+```
+
+Useful installed setup commands:
+
+```sh
+# Configure and print the ZPL test label
+sudo ocom-t4201-setup
+
+# Configure without printing
+sudo ocom-t4201-setup --no-test
+
+# Select a printer when multiple USB printers are connected
+lpinfo -v | grep -i usb
+sudo ocom-t4201-setup --uri 'usb://THE_EXACT_URI'
+```
+
+Persistent package defaults can be changed in
+`/etc/default/ocom-t4201-driver`.
+
+On Debian or Ubuntu, the package can also be built natively:
+
+```sh
+sudo apt install -y build-essential cups-client dpkg-dev \
+  libcups2-dev libcupsimage2-dev python3
+make deb
+```
+
 ## Build on Ubuntu
 
 Install the CUPS development headers and compile:

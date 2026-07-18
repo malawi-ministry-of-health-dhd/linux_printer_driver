@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+case "${1:-}" in
+  remove|purge)
+    if command -v systemctl >/dev/null 2>&1 &&
+       [ -d /run/systemd/system ]; then
+      systemctl try-restart cups.service >/dev/null 2>&1 || true
+    elif command -v invoke-rc.d >/dev/null 2>&1; then
+      invoke-rc.d cups restart >/dev/null 2>&1 || true
+    fi
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,43 @@
+#!/bin/sh
+
+set -e
+
+restart_cups()
+{
+  if command -v systemctl >/dev/null 2>&1 &&
+     [ -d /run/systemd/system ]; then
+    systemctl enable --now cups.service >/dev/null 2>&1 || return 1
+    systemctl restart cups.service >/dev/null 2>&1
+  elif command -v invoke-rc.d >/dev/null 2>&1; then
+    invoke-rc.d cups restart >/dev/null 2>&1
+  elif command -v service >/dev/null 2>&1; then
+    service cups restart >/dev/null 2>&1
+  else
+    return 1
+  fi
+}
+
+case "${1:-}" in
+  configure)
+    if ! restart_cups; then
+      printf '%s\n' \
+        "WARNING: CUPS could not be restarted automatically." \
+        "Run 'sudo systemctl restart cups' before configuring the printer." >&2
+    fi
+
+    setup_options="--automatic"
+    if [ -n "${2:-}" ]; then
+      # Do not consume another label during package upgrades.
+      setup_options="$setup_options --no-test"
+    fi
+
+    if ! /usr/sbin/ocom-t4201-setup $setup_options; then
+      printf '%s\n' \
+        "WARNING: The OCOM driver was installed, but automatic USB setup did not complete." \
+        "Connect and power on the printer, then run:" \
+        "  sudo ocom-t4201-setup" >&2
+    fi
+    ;;
+esac
+
+exit 0

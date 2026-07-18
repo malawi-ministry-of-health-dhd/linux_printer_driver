@@ -1,0 +1,56 @@
+#!/bin/sh
+
+set -eu
+
+command_name=${0##*/}
+log_file=${MOCK_CUPS_LOG:?MOCK_CUPS_LOG is required}
+
+case "$command_name" in
+  id)
+    if [ "${1:-}" = "-u" ]; then
+      printf '0\n'
+    else
+      printf 'uid=0(root) gid=0(root)\n'
+    fi
+    ;;
+  lpinfo)
+    printf '%s\n' \
+      'direct usb://HP/OfficeJet?serial=OTHER' \
+      'direct usb://LabelPrinter/OCBP-T4201?serial=TEST123'
+    ;;
+  lpadmin|cupsenable|cupsaccept|lpoptions|lp)
+    {
+      printf '%s' "$command_name"
+      for argument in "$@"; do
+        printf ' <%s>' "$argument"
+      done
+      printf '\n'
+    } >> "$log_file"
+
+    case "$command_name" in
+      lpoptions)
+        printf 'PageSize=w288h108 MediaMethod=Direct PaperType=LabelGaps\n'
+        ;;
+      lp)
+        printf 'request id is OCOM_Ubuntu_Driver-1 (1 file(s))\n'
+        ;;
+    esac
+    ;;
+  lpstat)
+    case "${1:-}" in
+      -p)
+        printf 'printer OCOM_Ubuntu_Driver is idle. enabled since now\n'
+        ;;
+      -W)
+        # No pending jobs.
+        ;;
+      *)
+        printf 'printer OCOM_Ubuntu_Driver is idle. enabled since now\n'
+        ;;
+    esac
+    ;;
+  *)
+    printf 'unexpected mocked command: %s\n' "$command_name" >&2
+    exit 1
+    ;;
+esac
