@@ -16,7 +16,7 @@ The 25 mm roll core is a physical media property and needs no CUPS or TSPL
 setting. The PPD also includes the manufacturer's 2 × 4, 2 × 5, 3 × 4, 3 × 6,
 4 × 4, and 4 × 6 inch media sizes.
 
-## Automatic GitHub builds
+## Automatic GitHub builds and releases
 
 Every push to GitHub runs `.github/workflows/build-deb.yml`. The workflow:
 
@@ -26,14 +26,28 @@ Every push to GitHub runs `.github/workflows/build-deb.yml`. The workflow:
 4. Translates the included ZPL label as a smoke test.
 5. Uploads the `.deb` and `SHA256SUMS` as a GitHub Actions artifact retained
    for 30 days.
+6. For pushes to `main`, creates a uniquely tagged GitHub prerelease containing
+   the `.deb` and checksum.
 
-Open the repository's **Actions** tab, select the **Build Debian package**
-run, and download its artifact. Branch pushes use a unique version such as
-`1.0.0+git42.a1b2c3d`. A pushed tag beginning with `v`, such as `v1.2.0`,
-builds package version `1.2.0`.
+Open the repository's **Releases** page to download packages produced from
+`main`. Each push creates a prerelease tag such as `build-42` and a unique
+package version such as `1.0.0+git42.a1b2c3d`.
 
-The workflow can also be started manually from **Actions → Build Debian
-package → Run workflow**.
+Pushing a version tag beginning with `v`, such as `v1.2.0`, creates a normal
+GitHub Release named `OCOM OCBP-T4201 driver 1.2.0` containing package version
+`1.2.0`:
+
+```sh
+git tag v1.2.0
+git push origin v1.2.0
+```
+
+Builds from other branches remain downloadable from the corresponding
+**Actions** run but do not create repository releases.
+
+The workflow can also be started manually from **Actions → Build and release
+Debian package → Run workflow**. Manual runs build an Actions artifact but do
+not publish a release.
 
 ## Install the Debian package
 
