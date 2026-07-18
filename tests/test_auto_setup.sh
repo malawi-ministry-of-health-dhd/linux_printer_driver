@@ -12,7 +12,8 @@ install -d "$mock_bin"
 : > "$mock_log"
 
 for command_name in \
-  id lp lpadmin lpinfo lpoptions lpstat cupsenable cupsaccept; do
+  id lp lpadmin lpinfo lpoptions lpstat cupsenable cupsaccept \
+  systemctl service; do
   ln -s "$project_root/tests/mocks/cups-command" "$mock_bin/$command_name"
 done
 

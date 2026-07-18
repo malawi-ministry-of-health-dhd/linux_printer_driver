@@ -18,7 +18,7 @@ case "$command_name" in
       'direct usb://HP/OfficeJet?serial=OTHER' \
       'direct usb://LabelPrinter/OCBP-T4201?serial=TEST123'
     ;;
-  lpadmin|cupsenable|cupsaccept|lpoptions|lp)
+  lpadmin|cupsenable|cupsaccept|lpoptions|lp|systemctl|service)
     {
       printf '%s' "$command_name"
       for argument in "$@"; do
