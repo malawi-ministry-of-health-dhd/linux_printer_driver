@@ -18,6 +18,7 @@ warnings on stderr when the program is used as a filter.
 from __future__ import annotations
 
 import dataclasses
+import math
 import re
 import shlex
 import sys
@@ -42,6 +43,17 @@ PAGE_SIZES = {
 
 ROTATIONS = {"N": 0, "R": 90, "I": 180, "B": 270}
 
+# TSPL bitmap font metrics in dots: font name -> (width, height).
+# The OCBP-T4201 identifies as TSPL rather than TSPL2, so do not rely on the
+# scalable TSPL2-only font 0 or ROMAN.TTF.
+TSPL_BITMAP_FONTS = {
+    "1": (8, 12),
+    "2": (12, 20),
+    "3": (16, 24),
+    "4": (24, 32),
+    "5": (32, 48),
+}
+
 
 def _bounded_int(
     value: object,
@@ -54,6 +66,57 @@ def _bounded_int(
     except (TypeError, ValueError):
         return default
     return max(minimum, min(maximum, parsed))
+
+
+def _select_tspl_bitmap_font(
+    target_width: int,
+    target_height: int,
+) -> tuple[str, int, int, int, int]:
+    """Choose the closest TSPL bitmap font without visibly stretching text."""
+    best: Optional[tuple[float, int, str, int, int, int, int]] = None
+
+    for font_name, (base_width, base_height) in TSPL_BITMAP_FONTS.items():
+        for x_multiplier in range(1, 11):
+            for y_multiplier in range(1, 11):
+                actual_width = base_width * x_multiplier
+                actual_height = base_height * y_multiplier
+                size_error = (
+                    abs(actual_width - target_width) / target_width
+                    + abs(actual_height - target_height) / target_height
+                )
+                aspect_error = abs(
+                    math.log(
+                        (actual_width / actual_height)
+                        / (target_width / target_height)
+                    )
+                )
+                overshoot = (
+                    max(0, actual_width - target_width) / target_width
+                    + max(0, actual_height - target_height) / target_height
+                )
+                scaling_penalty = 0.12 * (
+                    (x_multiplier - 1) + (y_multiplier - 1)
+                )
+                score = (
+                    size_error
+                    + 0.75 * aspect_error
+                    + 0.25 * overshoot
+                    + scaling_penalty
+                )
+                candidate = (
+                    score,
+                    -(base_width * base_height),
+                    font_name,
+                    x_multiplier,
+                    y_multiplier,
+                    actual_width,
+                    actual_height,
+                )
+                if best is None or candidate < best:
+                    best = candidate
+
+    assert best is not None
+    return best[2], best[3], best[4], best[5], best[6]
 
 
 def _option_map(option_string: str) -> dict[str, str]:
@@ -148,6 +211,8 @@ class Label:
         self.hex_indicator: Optional[str] = None
         self.copies = settings.copies
         self.direction = 0
+        self.zpl_width_dots = settings.width_dots
+        self.zpl_height_dots = settings.height_dots
 
     @property
     def field_x(self) -> int:
@@ -194,7 +259,7 @@ class Label:
             1000,
         )
         if command == "^A@":
-            self.warn("^A@ downloaded fonts are mapped to TSPL built-in font 3")
+            self.warn("^A@ downloaded fonts are mapped to a TSPL bitmap font")
 
     def set_default_font(self, value: str) -> None:
         parts = value.strip().split(",")
@@ -247,12 +312,17 @@ class Label:
 
         if self.pending_barcode is None:
             rotation = ROTATIONS.get(self.font_orientation, 0)
-            x_multiplier = max(1, min(10, int(round(self.font_width / 16.0))))
-            y_multiplier = max(1, min(10, int(round(self.font_height / 24.0))))
+            (
+                font_name,
+                x_multiplier,
+                y_multiplier,
+                _actual_width,
+                actual_height,
+            ) = _select_tspl_bitmap_font(self.font_width, self.font_height)
             if self.field_is_typeset and rotation in (0, 180):
-                y = max(0, y - self.font_height)
+                y = max(0, y - actual_height)
             self.add_text_command(
-                f'TEXT {x},{y},"3",{rotation},{x_multiplier},'
+                f'TEXT {x},{y},"{font_name}",{rotation},{x_multiplier},'
                 f'{y_multiplier},"{value}"'
             )
         elif self.pending_barcode.kind == "QRCODE":
@@ -265,9 +335,17 @@ class Label:
             )
         else:
             readable = 1 if self.pending_barcode.human_readable else 0
+            height = self.pending_barcode.height
+            if self.pending_barcode.rotation in (0, 180):
+                available_height = self.settings.height_dots - y
+                if available_height < height:
+                    height = max(1, available_height)
+                    self.warn(
+                        "barcode height was clipped to the physical label boundary"
+                    )
             self.add_text_command(
                 f'BARCODE {x},{y},"{self.pending_barcode.kind}",'
-                f'{self.pending_barcode.height},{readable},'
+                f'{height},{readable},'
                 f'{self.pending_barcode.rotation},{self.module_width},'
                 f'{self.module_width},"{value}"'
             )
@@ -366,14 +444,20 @@ class Label:
 
         if upper == "^PW":
             dots = _bounded_int(value, self.settings.width_dots, 1, 100000)
+            self.zpl_width_dots = dots
             if dots != self.settings.width_dots:
-                self.settings.width_mm = dots * 25.4 / self.settings.dpi
-            self.settings.width_dots = dots
+                self.warn(
+                    f"^PW{dots} differs from the CUPS media width "
+                    f"{self.settings.width_dots}; kept the physical media size"
+                )
         elif upper == "^LL":
             dots = _bounded_int(value, self.settings.height_dots, 1, 100000)
+            self.zpl_height_dots = dots
             if dots != self.settings.height_dots:
-                self.settings.height_mm = dots * 25.4 / self.settings.dpi
-            self.settings.height_dots = dots
+                self.warn(
+                    f"^LL{dots} differs from the CUPS media height "
+                    f"{self.settings.height_dots}; kept the physical media size"
+                )
         elif upper == "^LH":
             parts = value.split(",")
             self.home_x = _bounded_int(parts[0] if parts else None, 0, -100000, 100000)

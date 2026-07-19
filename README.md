@@ -31,7 +31,7 @@ Every push to GitHub runs `.github/workflows/build-deb.yml`. The workflow:
 
 Open the repository's **Releases** page to download packages produced from
 `main`. Each push creates a prerelease tag such as `build-42` and a unique
-package version such as `1.0.0+git42.a1b2c3d`.
+package version such as `1.0.4+git42.a1b2c3d`.
 
 Pushing a version tag beginning with `v`, such as `v1.2.0`, creates a normal
 GitHub Release named `OCOM OCBP-T4201 driver 1.2.0` containing package version
@@ -71,21 +71,21 @@ make deb-docker
 The package is written to:
 
 ```text
-dist/ocom-ocbp-t4201-driver_1.0.0_amd64.deb
+dist/ocom-ocbp-t4201-driver_1.0.4_amd64.deb
 ```
 
 Copy it to the Ubuntu computer, connect and power on the printer, then install
 it with `apt` so dependencies are resolved automatically:
 
 ```sh
-sudo apt install ./ocom-ocbp-t4201-driver_1.0.0_amd64.deb
+sudo apt install ./ocom-ocbp-t4201-driver_1.0.4_amd64.deb
 ```
 
 If the Ubuntu computer uses ARM64:
 
 ```sh
 make deb-docker DEB_PLATFORM=linux/arm64
-sudo apt install ./ocom-ocbp-t4201-driver_1.0.0_arm64.deb
+sudo apt install ./ocom-ocbp-t4201-driver_1.0.4_arm64.deb
 ```
 
 The package remains successfully installed when no printer is connected.
@@ -273,7 +273,7 @@ make sample-pdf
 ## ZPL input support
 
 The OCBP-T4201 does not receive ZPL directly. The installed `zpl_to_tspl`
-filter translates supported ZPL commands on Ubuntu and sends native TSPL2 to
+filter translates supported ZPL commands on Ubuntu and sends native TSPL to
 the printer.
 
 Submit the included ZPL sample through the complete CUPS ZPL-to-TSPL conversion
@@ -308,6 +308,13 @@ The translator supports:
 - Boxes, lines, circles, and uncompressed ASCII graphics:
   `^GB`, `^GC`, `^GFA`
 - Copies, speed, darkness, and orientation: `^PQ`, `^PR`, `^MD`, `~SD`, `^PO`
+
+The CUPS `PageSize` remains authoritative for physical media. `^PW` and `^LL`
+are accepted as ZPL layout declarations, but they cannot enlarge or shrink the
+TSPL `SIZE` command beyond the selected label. This prevents a template with
+`^LL450` from feeding 56.3 mm when the configured label is only 38.1 mm high.
+ZPL font dimensions are mapped to the closest native TSPL bitmap font and
+multiplier combination to avoid visibly stretched text.
 
 This is a bounded translator rather than a complete ZPL firmware emulator.
 Compressed `^GF` graphics, stored/downloaded objects (`~DG`, `^XG`, `^XF`),

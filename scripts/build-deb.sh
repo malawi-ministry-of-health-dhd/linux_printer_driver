@@ -3,7 +3,7 @@
 set -eu
 
 package_name=ocom-ocbp-t4201-driver
-version=${VERSION:-1.0.0}
+version=${VERSION:-1.0.4}
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 build_dir=${BUILD_DIR:-"$project_root/build/deb"}
 dist_dir=${DIST_DIR:-"$project_root/dist"}

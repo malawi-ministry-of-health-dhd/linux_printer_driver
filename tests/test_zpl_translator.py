@@ -22,7 +22,7 @@ class ZplToTsplTests(unittest.TestCase):
             b'BARCODE 238,30,"128",130,0,0,3,3,"JOHNDOE"\r\n',
             result.data,
         )
-        self.assertIn(b'TEXT 278,205,"3",0,2,2,"JOHN DOE"\r\n', result.data)
+        self.assertIn(b'TEXT 278,205,"5",0,1,1,"JOHN DOE"\r\n', result.data)
         self.assertTrue(result.data.endswith(b"PRINT 1,1\r\n"))
 
     def test_code39_qr_hex_text_and_copies(self) -> None:
@@ -45,6 +45,33 @@ class ZplToTsplTests(unittest.TestCase):
         result = translate_zpl(source)
 
         self.assertIn(b"BITMAP 1,2,1,2,0,\x7f\x00\r\n", result.data)
+
+    def test_cups_media_bounds_and_square_font_for_patient_label(self) -> None:
+        source = (
+            b"^XA^PW750^LL450"
+            b"^FO10,15^FB800,10,5,L,0"
+            b"^A0N,30,30^FDJohn Banda - 1969-03-11 ^FS"
+            b"^FO10,55^FB800,10,5,L,0"
+            b"^A0N,30,30^FDP100100000025 (M)^FS"
+            b"^FO10,90^FB800,10,5,L,0"
+            b"^A0N,30,30^FDDedza, Chauma, Biwi James^FS"
+            b"^FO20,130^BY4,150,8"
+            b"^BCN,150,N,N,N^FDP100100000025^FS^FS^XZ"
+        )
+        result = translate_zpl(source, Settings())
+
+        self.assertIn(b"SIZE 101.6 mm,38.1 mm\r\n", result.data)
+        self.assertNotIn(b"SIZE 93.8 mm,56.3 mm\r\n", result.data)
+        self.assertIn(
+            b'TEXT 10,15,"4",0,1,1,"John Banda - 1969-03-11 "\r\n',
+            result.data,
+        )
+        self.assertIn(
+            b'BARCODE 20,130,"128",150,0,0,4,4,"P100100000025"\r\n',
+            result.data,
+        )
+        self.assertTrue(any("^PW750" in warning for warning in result.warnings))
+        self.assertTrue(any("^LL450" in warning for warning in result.warnings))
 
     def test_cups_options_control_setup(self) -> None:
         settings = Settings.from_cups_options(

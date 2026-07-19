@@ -20,7 +20,7 @@ DARKNESS ?= 8
 SETUP_TEST ?= zpl
 INPUT ?= tests/OCOM_T4201_test_label.zpl
 OUTPUT ?= /tmp/OCOM_T4201_translated.tspl
-VERSION ?= 1.0.0
+VERSION ?= 1.0.4
 DEB_PLATFORM ?= linux/amd64
 DEB_IMAGE ?= ubuntu:22.04
 

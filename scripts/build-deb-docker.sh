@@ -5,7 +5,7 @@ set -eu
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 platform=${DEB_PLATFORM:-linux/amd64}
 image=${DEB_IMAGE:-ubuntu:22.04}
-version=${VERSION:-1.0.0}
+version=${VERSION:-1.0.4}
 
 command -v docker >/dev/null 2>&1 || {
   printf 'ERROR: Docker is required for make deb-docker\n' >&2
